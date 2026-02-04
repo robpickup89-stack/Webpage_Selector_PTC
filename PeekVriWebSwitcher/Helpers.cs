@@ -155,7 +155,7 @@ public static class DirectoryChecksum
 
         foreach (var file in files)
         {
-            var rel = Path.GetRelativePath(dir, file).Replace('\', '/');
+            var rel = Path.GetRelativePath(dir, file).Replace('\\', '/');
             var relBytes = Encoding.UTF8.GetBytes(rel);
             sha.TransformBlock(relBytes, 0, relBytes.Length, null, 0);
 
