@@ -320,7 +320,7 @@ public sealed class MainForm : Form
 
             Log($"Activated package '{pkg.Name}' to: {env.EnPath}");
             await UpdateEnvironmentStatusAsync();
-            MessageBox.Show(this, "Activated successfully.", "Activate", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(this, $"Activated successfully.\n\nPath: {loadwebZip}", "Activate", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         catch (Exception ex)
         {
