@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -36,6 +37,16 @@ public sealed class MainForm : Form
         Height = 700;
         StartPosition = FormStartPosition.CenterScreen;
 
+        // Load and set form icon from embedded resource
+        var asm = Assembly.GetExecutingAssembly();
+        var iconRes = asm.GetManifestResourceNames().FirstOrDefault(n => n.EndsWith("swarco.ico", StringComparison.OrdinalIgnoreCase));
+        if (iconRes != null)
+        {
+            using var iconStream = asm.GetManifestResourceStream(iconRes);
+            if (iconStream != null)
+                Icon = new Icon(iconStream);
+        }
+
         _packagesRoot = Path.Combine(_appRoot, "Packages");
         _backupsRoot = Path.Combine(_appRoot, "Backups");
 
@@ -55,7 +66,7 @@ public sealed class MainForm : Form
         root.Controls.Add(top, 0, 0);
         root.SetColumnSpan(top, 2);
 
-        var envGroup = new GroupBox { Text = "Environments (C:\\PeekVri_UK_*)", Dock = DockStyle.Fill, Padding = new Padding(8) };
+        var envGroup = new GroupBox { Text = "Environments (C:\\*\\PTC-1\\webserver\\srm2\\EN)", Dock = DockStyle.Fill, Padding = new Padding(8) };
         envGroup.Controls.Add(_envList);
         root.Controls.Add(envGroup, 0, 1);
 
@@ -297,6 +308,15 @@ public sealed class MainForm : Form
             // Replace EN contents
             DirectoryCopy.CleanDirectory(env.EnPath);
             DirectoryCopy.CopyDirectory(pkg.EnRootPath, env.EnPath);
+
+            // Copy source.zip as loadweb.zip to EN folder
+            var sourceZip = Path.Combine(pkg.PackageDir, "source.zip");
+            var loadwebZip = Path.Combine(env.EnPath, "loadweb.zip");
+            if (File.Exists(sourceZip))
+            {
+                File.Copy(sourceZip, loadwebZip, overwrite: true);
+                Log($"Copied package zip as: {loadwebZip}");
+            }
 
             Log($"Activated package '{pkg.Name}' to: {env.EnPath}");
             await UpdateEnvironmentStatusAsync();

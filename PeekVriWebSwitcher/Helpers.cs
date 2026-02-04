@@ -16,30 +16,41 @@ public sealed record EnvironmentTarget(string BasePath, string EnPath)
 public static class EnvironmentScanner
 {
     /// <summary>
-    /// Finds environments like C:\PeekVri_UK_* and tries to locate the SRM2 EN folder.
-    /// Supports both:
-    ///   C:\PeekVri_UK_x\PTC-1\webserver\srm2\EN
-    ///   C:\PeekVri_UK_x\webserver\srm2\EN
+    /// Finds environments that contain PTC-1\webserver\srm2\EN structure.
+    /// Searches all top-level directories in C:\ for the path pattern.
     /// </summary>
     public static IEnumerable<EnvironmentTarget> FindPeekVriEnvironments()
     {
         var root = "C:\\";
-        var dirs = Directory.EnumerateDirectories(root, "PeekVri_UK_*", SearchOption.TopDirectoryOnly);
+        IEnumerable<string> dirs;
+        try
+        {
+            dirs = Directory.EnumerateDirectories(root, "*", SearchOption.TopDirectoryOnly);
+        }
+        catch
+        {
+            yield break;
+        }
 
         foreach (var baseDir in dirs.OrderBy(d => d, StringComparer.OrdinalIgnoreCase))
         {
-            var cand1 = Path.Combine(baseDir, "PTC-1", "webserver", "srm2", "EN");
-            var cand2 = Path.Combine(baseDir, "webserver", "srm2", "EN");
+            // Skip system directories
+            var dirName = Path.GetFileName(baseDir);
+            if (dirName.StartsWith("$") || dirName.Equals("Windows", StringComparison.OrdinalIgnoreCase) ||
+                dirName.Equals("Program Files", StringComparison.OrdinalIgnoreCase) ||
+                dirName.Equals("Program Files (x86)", StringComparison.OrdinalIgnoreCase) ||
+                dirName.Equals("ProgramData", StringComparison.OrdinalIgnoreCase) ||
+                dirName.Equals("Users", StringComparison.OrdinalIgnoreCase) ||
+                dirName.Equals("Recovery", StringComparison.OrdinalIgnoreCase) ||
+                dirName.Equals("System Volume Information", StringComparison.OrdinalIgnoreCase))
+                continue;
 
-            if (Directory.Exists(cand1) || Directory.Exists(Path.GetDirectoryName(cand1)!))
-                yield return new EnvironmentTarget(baseDir, cand1);
-            else if (Directory.Exists(cand2) || Directory.Exists(Path.GetDirectoryName(cand2)!))
-                yield return new EnvironmentTarget(baseDir, cand2);
-            else
-            {
-                // If neither exists, still offer cand1 as default (so user can create it)
-                yield return new EnvironmentTarget(baseDir, cand1);
-            }
+            var enPath = Path.Combine(baseDir, "PTC-1", "webserver", "srm2", "EN");
+            var srm2Path = Path.GetDirectoryName(enPath)!;
+
+            // Check if the PTC-1\webserver\srm2 structure exists (EN folder may or may not exist yet)
+            if (Directory.Exists(enPath) || Directory.Exists(srm2Path))
+                yield return new EnvironmentTarget(baseDir, enPath);
         }
     }
 }
