@@ -72,25 +72,33 @@ public sealed record WebPackage(string Name, string PackageDir, string EnRootPat
             var metaPath = Path.Combine(dir, "package.json");
             if (!File.Exists(metaPath)) continue;
 
-            try
-            {
-                using var doc = JsonDocument.Parse(File.ReadAllText(metaPath, Encoding.UTF8));
-                var root = doc.RootElement;
+            var pkg = TryLoadPackage(dir, metaPath);
+            if (pkg != null)
+                yield return pkg;
+        }
+    }
 
-                var name = root.GetProperty("name").GetString() ?? Path.GetFileName(dir);
-                var enRoot = root.GetProperty("enRootPath").GetString() ?? Path.Combine(dir, "extracted");
-                var checksum = root.GetProperty("checksum").GetString() ?? "";
-                var embedded = root.TryGetProperty("isEmbedded", out var e) && e.GetBoolean();
+    private static WebPackage? TryLoadPackage(string dir, string metaPath)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(File.ReadAllText(metaPath, Encoding.UTF8));
+            var root = doc.RootElement;
 
-                if (!Directory.Exists(enRoot))
-                    continue;
+            var name = root.GetProperty("name").GetString() ?? Path.GetFileName(dir);
+            var enRoot = root.GetProperty("enRootPath").GetString() ?? Path.Combine(dir, "extracted");
+            var checksum = root.GetProperty("checksum").GetString() ?? "";
+            var embedded = root.TryGetProperty("isEmbedded", out var e) && e.GetBoolean();
 
-                yield return new WebPackage(name, dir, enRoot, checksum, embedded);
-            }
-            catch
-            {
-                // ignore broken package
-            }
+            if (!Directory.Exists(enRoot))
+                return null;
+
+            return new WebPackage(name, dir, enRoot, checksum, embedded);
+        }
+        catch
+        {
+            // ignore broken package
+            return null;
         }
     }
 }
