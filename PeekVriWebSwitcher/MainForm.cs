@@ -151,7 +151,7 @@ public sealed class MainForm : Form
                 }
 
                 var checksum = await Task.Run(() => DirectoryChecksum.ComputeSha256(enRoot));
-                var pkg = new WebPackage(e.Name, destDir, enRoot, checksum, isEmbedded: true);
+                var pkg = new WebPackage(e.Name, destDir, enRoot, checksum, IsEmbedded: true);
                 pkg.SaveMetadata();
 
                 Log($"Extracted embedded: {e.Name} (checksum {checksum[..12]}...)");
@@ -257,7 +257,7 @@ public sealed class MainForm : Form
                 throw new InvalidOperationException("Couldn't find an EN folder inside the zip. Expected either: webserver\\srm2\\EN, srm2\\EN, or a zip where the root is already the EN content.");
 
             var checksum = await Task.Run(() => DirectoryChecksum.ComputeSha256(enRoot));
-            var pkg = new WebPackage(name, destDir, enRoot, checksum, isEmbedded: false);
+            var pkg = new WebPackage(name, destDir, enRoot, checksum, IsEmbedded: false);
             pkg.SaveMetadata();
 
             Log($"Added package: {pkg.Name} (checksum {checksum[..12]}...)");

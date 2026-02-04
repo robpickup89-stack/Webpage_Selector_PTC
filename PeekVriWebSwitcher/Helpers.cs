@@ -64,8 +64,10 @@ public sealed record WebPackage(string Name, string PackageDir, string EnRootPat
 
     public static IEnumerable<WebPackage> LoadAll(string packagesRoot)
     {
+        var results = new List<WebPackage>();
+
         if (!Directory.Exists(packagesRoot))
-            yield break;
+            return results;
 
         foreach (var dir in Directory.EnumerateDirectories(packagesRoot))
         {
@@ -85,13 +87,15 @@ public sealed record WebPackage(string Name, string PackageDir, string EnRootPat
                 if (!Directory.Exists(enRoot))
                     continue;
 
-                yield return new WebPackage(name, dir, enRoot, checksum, embedded);
+                results.Add(new WebPackage(name, dir, enRoot, checksum, embedded));
             }
             catch
             {
                 // ignore broken package
             }
         }
+
+        return results;
     }
 }
 
