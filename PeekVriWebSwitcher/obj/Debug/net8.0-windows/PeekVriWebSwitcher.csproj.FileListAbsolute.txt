@@ -1,0 +1,4 @@
+C:\Users\robert.pickup\OneDrive - Swarco AG\Desktop\PeekVriWebSwitcher_WinForms_Source\PeekVriWebSwitcher\obj\Debug\net8.0-windows\PeekVriWebSwitcher.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\robert.pickup\OneDrive - Swarco AG\Desktop\PeekVriWebSwitcher_WinForms_Source\PeekVriWebSwitcher\obj\Debug\net8.0-windows\PeekVriWebSwitcher.AssemblyInfoInputs.cache
+C:\Users\robert.pickup\OneDrive - Swarco AG\Desktop\PeekVriWebSwitcher_WinForms_Source\PeekVriWebSwitcher\obj\Debug\net8.0-windows\PeekVriWebSwitcher.AssemblyInfo.cs
+C:\Users\robert.pickup\OneDrive - Swarco AG\Desktop\PeekVriWebSwitcher_WinForms_Source\PeekVriWebSwitcher\obj\Debug\net8.0-windows\PeekVriWebSwitcher.csproj.CoreCompileInputs.cache
