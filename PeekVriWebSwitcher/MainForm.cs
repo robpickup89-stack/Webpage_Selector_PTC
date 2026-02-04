@@ -217,7 +217,24 @@ public sealed class MainForm : Form
 
         try
         {
-            var checksum = await Task.Run(() => Directory.Exists(env.EnPath) ? DirectoryChecksum.ComputeSha256(env.EnPath) : "(missing EN folder)");
+            var loadwebZip = Path.Combine(env.EnPath, "loadweb.zip");
+            string checksum;
+
+            if (File.Exists(loadwebZip))
+            {
+                // Compute checksum from loadweb.zip contents
+                checksum = await Task.Run(() => DirectoryChecksum.ComputeZipContentsSha256(loadwebZip));
+            }
+            else if (Directory.Exists(env.EnPath))
+            {
+                // Fallback: compute from EN folder contents (legacy support)
+                checksum = await Task.Run(() => DirectoryChecksum.ComputeSha256(env.EnPath));
+            }
+            else
+            {
+                checksum = "(missing EN folder)";
+            }
+
             _envStatus.Text = $"Active checksum: {checksum}";
             var match = _pkgs.FirstOrDefault(p => p.Checksum.Equals(checksum, StringComparison.OrdinalIgnoreCase));
             if (match != null)
@@ -305,11 +322,10 @@ public sealed class MainForm : Form
 
             Log($"Backup created: {backupDir}");
 
-            // Replace EN contents
+            // Replace EN contents with only loadweb.zip (no extracted files)
             DirectoryCopy.CleanDirectory(env.EnPath);
-            DirectoryCopy.CopyDirectory(pkg.EnRootPath, env.EnPath);
 
-            // Copy source.zip as loadweb.zip to EN folder
+            // Copy source.zip as loadweb.zip to EN folder (only file in EN folder)
             var sourceZip = Path.Combine(pkg.PackageDir, "source.zip");
             var loadwebZip = Path.Combine(env.EnPath, "loadweb.zip");
             if (File.Exists(sourceZip))
@@ -317,8 +333,12 @@ public sealed class MainForm : Form
                 File.Copy(sourceZip, loadwebZip, overwrite: true);
                 Log($"Copied package zip as: {loadwebZip}");
             }
+            else
+            {
+                throw new FileNotFoundException($"Package source.zip not found: {sourceZip}");
+            }
 
-            Log($"Activated package '{pkg.Name}' to: {env.EnPath}");
+            Log($"Activated package '{pkg.Name}' to: {env.EnPath} (loadweb.zip only)");
             await UpdateEnvironmentStatusAsync();
             MessageBox.Show(this, $"Activated successfully.\n\nPath: {loadwebZip}", "Activate", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }

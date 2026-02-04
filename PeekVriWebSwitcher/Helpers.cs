@@ -185,6 +185,33 @@ public static class DirectoryChecksum
         sha.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
         return Convert.ToHexString(sha.Hash!).ToLowerInvariant();
     }
+
+    /// <summary>
+    /// Computes a stable SHA256 for the EN content inside a loadweb.zip file.
+    /// Extracts to a temp folder, finds EN root, computes checksum, then cleans up.
+    /// </summary>
+    public static string ComputeZipContentsSha256(string zipPath)
+    {
+        if (!File.Exists(zipPath))
+            return "(missing zip)";
+
+        var tempDir = Path.Combine(Path.GetTempPath(), "PeekVriWebSwitcher_temp_" + Guid.NewGuid().ToString("N")[..8]);
+        try
+        {
+            Directory.CreateDirectory(tempDir);
+            System.IO.Compression.ZipFile.ExtractToDirectory(zipPath, tempDir, overwriteFiles: true);
+
+            var enRoot = WebPackageLocator.FindEnRoot(tempDir);
+            if (enRoot == null)
+                return "(no EN root in zip)";
+
+            return ComputeSha256(enRoot);
+        }
+        finally
+        {
+            try { Directory.Delete(tempDir, recursive: true); } catch { }
+        }
+    }
 }
 
 public static class DirectoryCopy
