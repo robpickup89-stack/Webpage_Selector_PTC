@@ -17,7 +17,6 @@ public sealed class MainForm : Form
     private readonly TextBox _log = new() { Dock = DockStyle.Fill, Multiline = true, ScrollBars = ScrollBars.Both, ReadOnly = true, WordWrap = false };
     private readonly Button _refreshBtn = new() { Text = "Refresh environments" };
     private readonly Button _addZipBtn = new() { Text = "Add web ZIP..." };
-    private readonly Button _extractEmbeddedBtn = new() { Text = "Extract embedded packages" };
     private readonly Button _activateBtn = new() { Text = "Activate selected package" };
     private readonly Button _openEnvBtn = new() { Text = "Open environment folder" };
     private readonly Label _envStatus = new() { AutoSize = true, Text = "Active checksum: (select environment)" };
@@ -52,7 +51,7 @@ public sealed class MainForm : Form
         Controls.Add(root);
 
         var top = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.LeftToRight, WrapContents = false, AutoScroll = true, Padding = new Padding(8, 8, 8, 8) };
-        top.Controls.AddRange(new Control[] { _refreshBtn, _extractEmbeddedBtn, _addZipBtn, _activateBtn, _openEnvBtn });
+        top.Controls.AddRange(new Control[] { _refreshBtn, _addZipBtn, _activateBtn, _openEnvBtn });
         root.Controls.Add(top, 0, 0);
         root.SetColumnSpan(top, 2);
 
@@ -82,7 +81,6 @@ public sealed class MainForm : Form
         root.SetColumnSpan(bottom, 2);
 
         _refreshBtn.Click += async (_, __) => await RefreshEnvironmentsAsync();
-        _extractEmbeddedBtn.Click += async (_, __) => await EnsureEmbeddedPackagesExtractedAsync(force: true);
         _addZipBtn.Click += async (_, __) => await AddZipAsync();
         _activateBtn.Click += async (_, __) => await ActivateSelectedAsync();
         _openEnvBtn.Click += (_, __) => OpenSelectedEnvironmentFolder();
